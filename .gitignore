@@ -1,0 +1,13 @@
+# Ignorar entornos virtuales de Python
+venv/
+env/
+__pycache__/
+
+# Ignorar archivos temporales de Terraform
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+*.tfvars
+
+# Ignorar archivos ocultos del sistema
+.DS_Store
