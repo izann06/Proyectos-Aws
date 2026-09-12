@@ -55,7 +55,7 @@ resource "aws_instance" "mi_servidor" {
   ami           = data.aws_ami.ubuntu_latest.id # Usa el sistema operativo que encontró arriba
   instance_type = "t2.micro"                    # La máquina gratuita de AWS
   # Conectamos las piezas que creamos antes
-  key_name               = aws_key_pair.mi_llave.ssh_name
+  key_name               = aws_key_pair.mi_llave_ssh_name
   vpc_security_group_ids = [aws_security_group.mi_sg.id]
   # Script de automatización que se ejecuta al encender la máquina
   user_data = <<-EOF
