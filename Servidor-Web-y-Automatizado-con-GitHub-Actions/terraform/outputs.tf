@@ -5,5 +5,5 @@ output "ip_publica_del_servidor" {
 
 output "comando_ssh" {
   description = "Comando para conectarse al servidor"
-  value       = "ssh -i $HOME/.ssh/aws_ubuntu_key ubuntu@${aws_instance.mi_servidor.public_ip}"
+  value       = "ssh -i ~/.ssh/aws_ubuntu_key ubuntu@${aws_instance.mi_servidor.public_ip}"
 }

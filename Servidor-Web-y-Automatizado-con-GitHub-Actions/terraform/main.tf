@@ -1,7 +1,7 @@
 # SSH
 resource "aws_key_pair" "mi_llave_ssh" {
   key_name   = "${var.proyecto}-key"                 # Se define el nombre de la llave SSH
-  public_key = file("$HOME/.ssh/aws_ubuntu_key.pub") # Se especifica la llave publica esa ruta es donde esta mi llave
+  public_key = file("~/.ssh/aws_ubuntu_key.pub") # Se especifica la llave publica esa ruta es donde esta mi llave
 }
 
 # Security Group
@@ -55,7 +55,7 @@ resource "aws_instance" "mi_servidor" {
   ami           = data.aws_ami.ubuntu_latest.id # Usa el sistema operativo que encontró arriba
   instance_type = "t2.micro"                    # La máquina gratuita de AWS
   # Conectamos las piezas que creamos antes
-  key_name               = aws_key_pair.mi_llave_ssh_name
+  key_name               = aws_key_pair.mi_llave_ssh.key_name
   vpc_security_group_ids = [aws_security_group.mi_sg.id]
   # Script de automatización que se ejecuta al encender la máquina
   user_data = <<-EOF
