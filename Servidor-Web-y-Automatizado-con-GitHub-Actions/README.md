@@ -140,3 +140,30 @@ Luego, emulé lo que haría un sistema de automatización, pero a mano:
 3. Ejecuté el contenedor mapeando el puerto 8080.
 
 ¡Y funcionó! Accediendo a la IP pública (`18.206.123.6:8080/docs`) desde el navegador pude ver la API funcionando en la nube.
+
+---
+
+## Paso 7: Automatización Total con CI/CD (GitHub Actions)
+
+El objetivo final de DevOps es que los despliegues sean aburridos y automáticos. Para no tener que hacer el paso 6 a mano nunca más, configuré un pipeline de Integración y Despliegue Continuo (CI/CD) usando **GitHub Actions**.
+
+### 1. Configurando los Secretos
+Para que GitHub tenga permiso para entrar a mi servidor de AWS, añadí dos secretos de repositorio en la configuración de GitHub (`Settings > Secrets > Actions`):
+- `EC2_HOST`: La IP pública de mi servidor AWS (`18.206.123.6`).
+- `EC2_SSH_KEY`: El contenido de mi llave SSH privada (la que generé en el Paso 4 sin contraseña).
+
+### 2. El Pipeline (`deploy.yml`)
+Creé el archivo `.github/workflows/deploy.yml` que dicta las órdenes al robot de GitHub:
+1. **Trigger (`on: push`)**: El robot despierta automáticamente cada vez que hago un `git push` a la rama `main` y toco algún archivo de esta carpeta.
+2. **Conexión SSH**: Utiliza una Action comunitaria (`appleboy/ssh-action`) para usar mis secretos y conectarse a la máquina EC2 en AWS de forma segura.
+3. **Despliegue Automático**: Una vez dentro de la máquina, el robot ejecuta comandos bash por mí:
+   - Descarga el código actualizado (`git pull`).
+   - Apaga y elimina el contenedor viejo forzosamente (`docker rm -f ServidorAws || true`). El `|| true` evita que el pipeline se rompa si el contenedor no existía previamente.
+   - Construye la nueva imagen (`docker build`).
+   - Arranca el nuevo contenedor (`docker run`).
+
+Con esto, he cerrado el ciclo DevOps por completo: desde el código local (Python), empaquetado (Docker), creación de infraestructura automatizada (Terraform) hasta el despliegue automático (GitHub Actions).
+
+Es un proyecto básico pero estoy orgulloso de haber podido crear y entender cada paso del proceso.
+
+Izan Marcos Martínez - 12/09/2026
