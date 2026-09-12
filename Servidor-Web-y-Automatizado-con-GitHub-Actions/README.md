@@ -101,3 +101,42 @@ En lugar de meter todo en un solo archivo, dividí la configuración base en dos
 2. `variables.tf`: Define variables (como la región o el nombre del proyecto) para no tener que escribirlas a fuego en el código (hardcodear).
 
 Finalmente, ejecuté `terraform init` para que Terraform descargara los binarios necesarios de AWS de internet.
+
+---
+
+## Paso 5: Creación de la Infraestructura (`main.tf` y `outputs.tf`)
+
+Una vez inicializado, pasé a definir los recursos reales en AWS usando bloques lógicos:
+
+1. **`aws_key_pair`**: Subí mi llave SSH pública a AWS para que la inyecte en el servidor y me permita entrar.
+2. **`aws_security_group`**: Creé un cortafuegos abriendo el puerto 22 (SSH) y el 8080 (donde escucha mi API). También abrí el tráfico de salida (`egress`) para que el servidor pudiese descargar cosas de internet.
+3. **`data "aws_ami"`**: En lugar de poner el ID exacto del sistema operativo Ubuntu (que cambia cada mes y rompe el código), usé un bloque `data` para que Terraform busque siempre la versión más reciente automáticamente.
+4. **`aws_instance`**: Creé el servidor (EC2 `t2.micro`). Lo conecté con la llave y el cortafuegos. Además, le añadí un script de **`user_data`**: un bloque de Bash que se ejecuta automáticamente al nacer la máquina para actualizar el sistema e instalar Docker sin mi intervención.
+
+Finalmente, creé un archivo `outputs.tf` para que Terraform me devolviera la IP pública del servidor y el comando SSH exacto al terminar, evitándome tener que entrar a la consola web de AWS a buscarlo.
+
+### Error documentado: "Permission denied (publickey)"
+
+**El Error:**
+Al intentar entrar por SSH al servidor recién creado, la terminal me pidió una contraseña (`Enter passphrase...`) y luego me denegó el acceso.
+
+**La Causa:**
+Al crear la llave SSH en la terminal de Windows con el flag `-N '""'`, la terminal interpretó mal las comillas y le asignó una contraseña desconocida a la llave. Como no me la sabía, AWS me rechazó.
+
+**La Solución:**
+1. Recreé la llave de forma limpia (`ssh-keygen -t ed25519 -f ~/.ssh/aws_ubuntu_key`) pulsando Enter para dejarla realmente sin contraseña.
+2. En `main.tf`, le cambié el nombre a la llave (`-v2`) para obligar a Terraform a detectar un cambio y subir la nueva.
+3. Hice `terraform apply` de nuevo. Terraform (como buena herramienta de IaC) destruyó el servidor viejo y creó uno nuevo con la llave correcta.
+
+---
+
+## Paso 6: Verificación Manual en AWS
+
+Una vez tuve la IP final de Terraform, entré al servidor por SSH. Comprobé que el script automático había instalado Docker con éxito.
+
+Luego, emulé lo que haría un sistema de automatización, pero a mano:
+1. Cloné mi repo de GitHub directamente en el servidor.
+2. Construí la imagen Docker localmente en AWS.
+3. Ejecuté el contenedor mapeando el puerto 8080.
+
+¡Y funcionó! Accediendo a la IP pública (`18.206.123.6:8080/docs`) desde el navegador pude ver la API funcionando en la nube.
