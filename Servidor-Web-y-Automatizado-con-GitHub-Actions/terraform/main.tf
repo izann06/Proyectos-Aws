@@ -1,6 +1,6 @@
 # SSH
 resource "aws_key_pair" "mi_llave_ssh" {
-  key_name   = "${var.proyecto}-key"                 # Se define el nombre de la llave SSH
+  key_name   = "${var.proyecto}-key-v2"          # Se define el nombre de la llave SSH
   public_key = file("~/.ssh/aws_ubuntu_key.pub") # Se especifica la llave publica esa ruta es donde esta mi llave
 }
 
