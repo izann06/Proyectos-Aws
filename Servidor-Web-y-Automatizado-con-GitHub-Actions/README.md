@@ -164,6 +164,13 @@ Creé el archivo `.github/workflows/deploy.yml` que dicta las órdenes al robot 
 
 Con esto, he cerrado el ciclo DevOps por completo: desde el código local (Python), empaquetado (Docker), creación de infraestructura automatizada (Terraform) hasta el despliegue automático (GitHub Actions).
 
+### 3. Health Check (Chequeo de Salud)
+Para hacer el pipeline más robusto y profesional, implementé un **Health Check** (un latido de corazón). En lugar de dar el despliegue por exitoso ciegamente al ejecutar Docker, el robot ejecuta un script Bash que:
+- Hace peticiones a la ruta `/health` de mi API usando `curl`.
+- Usa un bucle (`for i in {1..10}`) y `sleep 3` para esperar hasta 30 segundos, dando margen al servidor para arrancar.
+- Usa `grep -q "ok"` para buscar la respuesta esperada de la API en formato JSON.
+- Solo si encuentra la palabra clave, devuelve un código de éxito en Linux (`exit 0`), poniendo el pipeline en verde. Si se agota el tiempo, aborta con error (`exit 1`), marcando el despliegue como fallido (cruz roja).
+
 Es un proyecto básico pero estoy orgulloso de haber podido crear y entender cada paso del proceso.
 
 Izan Marcos Martínez - 12/09/2026
