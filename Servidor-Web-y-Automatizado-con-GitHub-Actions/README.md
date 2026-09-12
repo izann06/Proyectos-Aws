@@ -2,12 +2,6 @@
 
 Este documento refleja el paso a paso de mi aprendizaje práctico sobre DevOps, AWS, Docker, Terraform y GitHub Actions. Aquí documento la lógica detrás de cada archivo, los errores que he ido encontrando y sus soluciones.
 
-## Paso 0: Convenciones de Nombres en DevOps
-
-**Lección aprendida:** Los nombres de las carpetas en proyectos DevOps y Cloud no deben contener espacios ni caracteres especiales (como `\` o `/`).
-- **Por qué:** Los espacios rompen los scripts de Bash, Dockerfiles y pipelines de CI/CD, obligando a usar comillas constantemente.
-- **Buena práctica:** Usar minúsculas separadas por guiones (kebab-case), por ejemplo: `servidor-web-automatizado`.
-
 ---
 
 ## Paso 1: Construcción de la API con Python (FastAPI)
@@ -18,7 +12,7 @@ Un proyecto Python profesional necesita como mínimo dos cosas: las dependencias
 
 ### 1. Las Dependencias (`requirements.txt`)
 
-Es la "lista de la compra" para que el gestor de paquetes de Python (`pip`) sepa qué descargar desde **PyPI** (el repositorio oficial de librerías de Python).
+Es el archivo donde se ponen todas las dependencias para que el gestor de paquetes de Python (`pip`) sepa qué descargar desde **PyPI** (el repositorio oficial de librerías de Python).
 
 ```text
 fastapi==0.110.0
@@ -41,7 +35,7 @@ Aquí levantamos el servidor web.
   - `fastapi` (minúsculas) es el **paquete/módulo** descargado. Por convención, van en minúsculas.
   - `FastAPI` (PascalCase) es la **Clase** (el molde). Por convención, las clases empiezan por mayúscula.
 - **¿Para qué sirven el `title` y `description` si no los devuelvo en ninguna ruta?**
-  - FastAPI autogenera una página web de documentación interactiva (Swagger UI). Si entras a `http://localhost:PUERTO/docs`, verás esa información y botones para probar tu API sin necesidad de herramientas externas.
+  - FastAPI autogenera una página web de documentación interactiva (Swagger UI). Si entras a `http://localhost/docs`, verás esa información y botones para probar tu API sin necesidad de herramientas externas.
 - **¿Por qué un endpoint `/health`?**
   - Es fundamental en DevOps. Herramientas como AWS, Docker o Kubernetes hacen peticiones constantes a `/health` para saber si la aplicación sigue viva o si ha fallado y necesitan reiniciarla.
 
@@ -79,3 +73,31 @@ El argumento `-p HOST:CONTENEDOR` mapea un puerto de tu máquina (Windows) a un 
 1. Eliminar el contenedor que se quedó a medias: `docker rm ServidorAws`
 2. Mapearlo a un puerto libre en el Host (por ejemplo, el 8080): `docker run -d -p 8080:8000 --name ServidorAws servidoraws`.
 *(Nota: Si dentro del contenedor la app escucha en el 8080 por el CMD, el mapeo debe ajustarse a `-p PUERTO_HOST:8080`).*
+
+---
+
+## Paso 3: Preparando el terreno para AWS y Terraform
+
+Antes de escribir Infraestructura como Código, tuve que preparar la seguridad:
+
+### 1. Usuario IAM vs Usuario Raíz
+**Lección aprendida:** NUNCA debo usar las Access Keys del usuario raíz (Root). Si se filtran, pueden borrarme la cuenta o generarme miles de euros en facturas.
+- **Solución:** Fui a IAM en AWS, creé un usuario específico (`izan-admin`) con permisos de `AdministratorAccess`, generé sus propias Access Keys y las configuré en mi terminal ejecutando `aws configure`.
+
+### 2. Llaves SSH modernas
+Para conectarme al futuro servidor EC2 de forma segura sin usar contraseñas hackeables, generé una llave SSH usando el algoritmo más moderno y seguro:
+`ssh-keygen -t ed25519 -f $HOME/.ssh/aws_ubuntu_key -N '""'`
+- **¿Por qué sin contraseña (`-N '""'`)?** Porque más adelante, un robot (GitHub Actions) tendrá que usar esta llave. Si le pongo contraseña, el robot se quedará atascado esperando a que la teclee.
+
+---
+
+## Paso 4: Iniciando con Terraform (HCL)
+
+Terraform es la herramienta que usaremos para crear toda la arquitectura en AWS con código. Su lenguaje (HCL) funciona por bloques.
+
+**Buena práctica: Modularización**
+En lugar de meter todo en un solo archivo, dividí la configuración base en dos:
+1. `provider.tf`: Configura el "plugin" de AWS para que Terraform sepa con quién hablar.
+2. `variables.tf`: Define variables (como la región o el nombre del proyecto) para no tener que escribirlas a fuego en el código (hardcodear).
+
+Finalmente, ejecuté `terraform init` para que Terraform descargara los binarios necesarios de AWS de internet.
