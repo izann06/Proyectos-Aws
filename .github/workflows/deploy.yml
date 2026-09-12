@@ -1,0 +1,42 @@
+name: Despliegue de FastAPI a AWS
+
+# 1. ¿CUÁNDO se ejecuta este robot?
+on:
+    push:
+        branches:
+            - main # Solo se ejecuta cuando subimos código a la rama principal
+        paths:
+            - "Servidor-Web-y-Automatizado-con-GitHub-Actions/**" # Solo si hemos tocado archivos de este proyecto
+
+# 2. ¿QUÉ tiene que hacer el robot?
+jobs:
+    deploy:
+        runs-on: ubuntu-latest # El robot correrá en un ordenador temporal prestado por GitHub
+
+        steps:
+            - name: Conectarse por SSH a EC2 y desplegar
+              # Usamos una "Action" prefabricada por la comunidad para hacer SSH fácil
+              uses: appleboy/ssh-action@v1.0.3
+              with:
+                  host: ${{ secrets.EC2_HOST }} # Usa el secreto que configuraste antes
+                  username: ubuntu
+                  key: ${{ secrets.EC2_SSH_KEY }} # Usa tu llave privada secreta
+
+                  # Estos son los comandos que el robot escribirá en la terminal de AWS por ti
+                  script: |
+                      echo "1. Entrando a la carpeta del proyecto..."
+                      cd ProyectosPracticosAws/Servidor-Web-y-Automatizado-con-GitHub-Actions
+
+                      echo "2. Descargando el último código de GitHub..."
+                      git pull origin main
+
+                      echo "3. Apagando y borrando el contenedor viejo (si existe)..."
+                      docker rm -f ServidorAws || true
+
+                      echo "4. Construyendo la nueva imagen de Docker..."
+                      docker build -t servidoraws .
+
+                      echo "5. Levantando la API actualizada..."
+                      docker run -d -p 8080:8080 --name ServidorAws servidoraws
+
+                      echo "¡Despliegue finalizado con éxito!"
