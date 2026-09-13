@@ -2,6 +2,23 @@
 
 Este documento refleja el paso a paso de mi aprendizaje práctico sobre DevOps, AWS, Docker, Terraform y GitHub Actions. Aquí documento la lógica detrás de cada archivo, los errores que he ido encontrando y sus soluciones.
 
+> [!WARNING]
+> **Aviso sobre la infraestructura:** La instancia EC2 original creada en este proyecto (`18.206.123.6`) fue destruida al finalizar para evitar costes en AWS. Si intentas entrar a la IP, no funcionará. Si replicas este proyecto en tu propia cuenta usando mi código de Terraform, AWS te asignará una IP pública completamente nueva.
+
+## 📌 Datos del Despliegue (Histórico)
+- **Ruta principal:** `http://18.206.123.6:8080/`
+- **Documentación API interactiva:** `http://18.206.123.6:8080/docs`
+- **Health Check:** `http://18.206.123.6:8080/health`
+
+## 📑 Índice de Contenidos
+- [Paso 1: Construcción de la API con Python (FastAPI)](#paso-1-construcción-de-la-api-con-python-fastapi)
+- [Paso 2: Contenedorización con Docker](#paso-2-contenedorización-con-docker)
+- [Paso 3: Preparando el terreno para AWS y Terraform](#paso-3-preparando-el-terreno-para-aws-y-terraform)
+- [Paso 4: Iniciando con Terraform (HCL)](#paso-4-iniciando-con-terraform-hcl)
+- [Paso 5: Creación de la Infraestructura (`main.tf` y `outputs.tf`)](#paso-5-creación-de-la-infraestructura-maintf-y-outputstf)
+- [Paso 6: Verificación Manual en AWS](#paso-6-verificación-manual-en-aws)
+- [Paso 7: Automatización Total con CI/CD (GitHub Actions)](#paso-7-automatización-total-con-cicd-github-actions)
+
 ---
 
 ## Paso 1: Construcción de la API con Python (FastAPI)
