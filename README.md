@@ -13,10 +13,10 @@
 
 ## 📂 Directorio de Proyectos
 
-### 1. 🌐 [Servidor Web Automatizado (CI/CD)](./Servidor-Web-y-Automatizado-con-GitHub-Actions)
-**Tecnologías:** `Python/FastAPI` | `Docker` | `Terraform` | `AWS EC2` | `GitHub Actions`
+### 1. 🐳 [Evolución de Contenedores en AWS (De EC2 a Fargate)](./Evolucion-Contenedores-AWS)
+**Tecnologías:** `Python/FastAPI` | `Docker` | `Terraform` | `AWS EC2/ECR/ECS/Fargate` | `GitHub Actions`
 
-Un proyecto completo (End-to-End) que levanta una API en Python, la empaqueta en un contenedor Docker y la despliega automáticamente en un servidor Ubuntu de AWS cada vez que hay cambios en el código. [Ver detalles del proyecto](./Servidor-Web-y-Automatizado-con-GitHub-Actions/README.md).
+Un proyecto arquitectónico diseñado en 3 fases que demuestra cómo ha evolucionado el despliegue de contenedores en la nube: desde la gestión manual de servidores (IaaS), pasando por la orquestación híbrida con ECS, hasta llegar al mundo 100% Serverless con Fargate. [Ver el roadmap completo del proyecto](./Evolucion-Contenedores-AWS/README.md).
 
 ### 2. 🗣️ [AWS Serverless Text-to-Speech](./aws-serverless-text-to-speech)
 **Tecnologías:** `AWS Lambda` | `AWS Polly` | `AWS S3` | `Terraform` 
