@@ -7,6 +7,7 @@ on:
       - main # Solo se ejecuta cuando subimos código a la rama principal
     paths:
       - "Evolucion-Contenedores-AWS/api/**" # Solo si hemos tocado archivos de la API
+  workflow_dispatch: # Activa un botón en GitHub para lanzarlo manualmente cuando quieras
 
 # 2. ¿QUÉ tiene que hacer el robot?
 jobs:
