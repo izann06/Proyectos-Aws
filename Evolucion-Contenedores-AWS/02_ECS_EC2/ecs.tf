@@ -1,5 +1,5 @@
 # ==========================================
-# Paso 3: Orquestador (ECS Cluster)
+# Orquestador (ECS Cluster)
 # ==========================================
 # Un clúster en ECS no es más que una agrupación lógica. 
 # Piensa en él como un "tablero de ajedrez" vacío.

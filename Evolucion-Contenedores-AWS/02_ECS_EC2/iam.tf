@@ -1,5 +1,5 @@
 # ==========================================
-# Paso 2: Roles y Permisos (AWS IAM)
+# Roles y Permisos (AWS IAM)
 # ==========================================
 # En AWS, por defecto nadie confía en nadie (seguridad Zero Trust).
 # Como nuestro EC2 va a necesitar descargar la imagen desde el ECR,
