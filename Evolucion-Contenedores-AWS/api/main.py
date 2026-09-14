@@ -8,7 +8,7 @@ appIzan = FastAPI(
     
 )
 
-# Endpoint raíz: Cuando alguien entra a "http://[IP_ADDRESS]/", esta función se ejecuta.
+# Endpoint raíz. Cuando alguien entra a "http://[IP_ADDRESS]/", esta función se ejecuta.
 @appIzan.get("/")
 def raiz():
     return {"message":"Hola, estoy ejecutando un servidor con FastAPI en AWS gracias por probarlo :D"}
