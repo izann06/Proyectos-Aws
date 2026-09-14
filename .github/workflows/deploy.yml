@@ -2,58 +2,59 @@ name: Despliegue de FastAPI a AWS
 
 # 1. ¿CUÁNDO se ejecuta este robot?
 on:
-    push:
-        branches:
-            - main # Solo se ejecuta cuando subimos código a la rama principal
-        paths:
-            - "Evolucion-Contenedores-AWS/api/**" # Solo si hemos tocado archivos de la API
+  push:
+    branches:
+      - main # Solo se ejecuta cuando subimos código a la rama principal
+    paths:
+      - "Evolucion-Contenedores-AWS/api/**" # Solo si hemos tocado archivos de la API
 
 # 2. ¿QUÉ tiene que hacer el robot?
 jobs:
-    deploy:
-        runs-on: ubuntu-latest # El robot correrá en un ordenador temporal prestado por GitHub
+  deploy:
+    runs-on: ubuntu-latest # El robot correrá en un ordenador temporal prestado por GitHub
 
-        steps:
-            - name: Conectarse por SSH a EC2 y desplegar
-              # Usamos una "Action" prefabricada por la comunidad para hacer SSH fácil
-              uses: appleboy/ssh-action@v1.0.3
-              with:
-                  host: ${{ secrets.EC2_HOST }} # Usa el secreto que configuraste antes
-                  username: ubuntu
-                  key: ${{ secrets.EC2_SSH_KEY }} # Usa tu llave privada secreta
+    steps:
+      - name: Conectarse por SSH a EC2 y desplegar
+        # Usamos una "Action" prefabricada por la comunidad para hacer SSH fácil
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }} # Usa el secreto que configuraste antes
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }} # Usa tu llave privada secreta
 
-                  # Estos son los comandos que el robot escribirá en la terminal de AWS por ti
-                  script: |
-                      echo "1. Entrando a la carpeta raíz de proyectos..."
-                      cd ProyectosPracticosAws
-                      
-                      echo "2. Descargando el último código de GitHub..."
-                      git pull origin main
-                      
-                      echo "3. Entrando a la carpeta de la API..."
-                      cd Evolucion-Contenedores-AWS/api
+          # Estos son los comandos que el robot escribirá en la terminal de AWS por ti
+          script: |
+            echo "1. Descargando el último código de GitHub..."
+            if [ ! -d "Proyectos-Aws" ]; then
+              git clone https://github.com/izann06/Proyectos-Aws.git
+            fi
+            cd Proyectos-Aws
+            git pull origin main
 
-                      echo "4. Apagando y borrando el contenedor viejo (si existe)..."
-                      docker rm -f ServidorAws || true
+            echo "2. Entrando a la carpeta de la API..."
+            cd Evolucion-Contenedores-AWS/api
 
-                      echo "5. Construyendo la nueva imagen de Docker..."
-                      docker build -t servidoraws .
+            echo "3. Apagando y borrando el contenedor viejo (si existe)..."
+            docker rm -f ServidorAws || true
 
-                      echo "6. Levantando la API actualizada..."
-                      docker run -d -p 8080:8080 --name ServidorAws servidoraws
+            echo "4. Construyendo la nueva imagen de Docker..."
+            docker build -t servidoraws .
 
-                      echo "7. Comprobando que la API está sana..."
-                      # El robot hace peticiones a /health durante 30 segundos. Si responde, éxito. Si no, falla.
-                      for i in {1..10}; do
-                        # Buscamos la palabra 'ok' en la respuesta
-                        if curl -s http://localhost:8080/health | grep -q "ok"; then
-                          echo "¡API viva y comprobada!"
-                          echo "¡Despliegue finalizado con éxito!"
-                          exit 0
-                        fi
-                        echo "Esperando a la API..."
-                        sleep 3
-                      done
-                      
-                      echo "Error: La API no ha arrancado correctamente después de 30 segundos."
-                      exit 1
+            echo "5. Levantando la API actualizada..."
+            docker run -d -p 8080:8080 --name ServidorAws servidoraws
+
+            echo "6. Comprobando que la API está sana..."
+            # El robot hace peticiones a /health durante 30 segundos. Si responde, éxito. Si no, falla.
+            for i in {1..10}; do
+              # Buscamos la palabra 'ok' en la respuesta
+              if curl -s http://localhost:8080/health | grep -q "ok"; then
+                echo "¡API viva y comprobada!"
+                echo "¡Despliegue finalizado con éxito!"
+                exit 0
+              fi
+              echo "Esperando a la API..."
+              sleep 3
+            done
+
+            echo "Error: La API no ha arrancado correctamente después de 30 segundos."
+            exit 1
