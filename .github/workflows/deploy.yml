@@ -14,13 +14,18 @@ jobs:
         runs-on: ubuntu-latest # El robot correrá en un ordenador temporal prestado por GitHub
 
         steps:
+            - name: Preparar llave SSH
+              run: |
+                  printf '%b' "${{ secrets.EC2_SSH_KEY }}" | tr -d '\r' > .ec2_ssh_key
+                  chmod 600 .ec2_ssh_key
+
             - name: Conectarse por SSH a EC2 y desplegar
               # Usamos una "Action" prefabricada por la comunidad para hacer SSH fácil
               uses: appleboy/ssh-action@v1.0.3
               with:
                   host: ${{ secrets.EC2_HOST }} # Usa el secreto que configuraste antes
                   username: ubuntu
-                  key: ${{ secrets.EC2_SSH_KEY }} # Usa tu llave privada secreta
+                  key_path: .ec2_ssh_key # Usa tu llave privada secreta
 
                   # Estos son los comandos que el robot escribirá en la terminal de AWS por ti
                   script: |
