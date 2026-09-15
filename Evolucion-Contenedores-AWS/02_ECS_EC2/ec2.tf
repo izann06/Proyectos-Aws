@@ -68,6 +68,14 @@ resource "aws_launch_template" "ecs_template" {
     security_groups             = [aws_security_group.ecs_sg.id] # Le asignamos el portero de discoteca que creamos arriba
   }
 
+  # Le asigno un nombre a todas las máquinas que se fabriquen con este molde
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "${var.proyecto}-instancia"
+    }
+  }
+
   # ¡LA LÍNEA MÁGICA DE CONFIGURACIÓN! (user_data)
   # Este es el script que se ejecuta automáticamente la primera vez que se enciende la máquina.
   # Lo único que hace es escribir el nombre de nuestro Clúster (fase2-ecs-cluster) en un archivo interno.
