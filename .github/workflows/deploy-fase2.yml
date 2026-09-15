@@ -1,0 +1,102 @@
+name: "Fase 2: Despliegue a ECS" # Nombre que aparece en la web de GitHub Actions
+
+# ¿CUÁNDO SE EJECUTA ESTE ROBOT? (on)
+on:
+  push:
+    branches: ["main"] # Se ejecuta cuando hago un git push a la rama principal (main)
+    # paths: "Solo se ejecuta si ha habido algún cambio de código DENTRO de la carpeta /api.
+    # Si solo cambio un README o algo de Terraform, el robot ignorará el push y no hará el workflow.
+    # ya que dentro de /api tengo lo importante que quiero que actualice que es el Dockerfile y el código de la Api
+    paths:
+      - "Evolucion-Contenedores-AWS/api/**"
+
+  # Nos permite ir a la pestaña "Actions" en la web de GitHub y darle a un botón de "Run workflow" manualmente. Para no tener que estar haciendo siempre push a main.
+  workflow_dispatch:
+
+# VARIABLES GLOBALES (env)
+# Aquí defino las variables que usaré más abajo.
+# Fíjate que estos nombres coinciden EXACTAMENTE con los nombres que le di a los recursos en Terraform.
+env:
+  AWS_REGION: us-east-1 # La región donde está mi infraestructura
+  ECR_REPOSITORY: fase2-ecs-api-repo # El nombre del repositorio de imágenes (ECR) que creé en ecr.tf
+  ECS_SERVICE: fase2-ecs-service # El nombre del servicio (ECS Service) en task_service.tf
+  ECS_CLUSTER: fase2-ecs-cluster # El nombre del clúster (ECS Cluster) en ecs.tf
+
+# Aquí defino los trabajos que quiero que haga el robot.
+# En este caso, solo hay uno llamado 'deploy'.
+jobs:
+  deploy:
+    name: Deploy to ECS
+
+    # ¿DÓNDE CORRE EL ROBOT? (runs-on)
+    # 'ubuntu-latest' significa que GitHub me presta un ordenador virtual gratuito
+    # con la última versión de Ubuntu instalada para que el robot trabaje ahí.
+    # Opciones comunes:
+    # - 'ubuntu-latest' (El más usado, rápido y el que mejor soporte tiene para Docker).
+    # - 'windows-latest' (Si tuviera que compilar una app de C# o .NET específica de Windows).
+    # - 'macos-latest' (Obligatorio si estuviera compilando una app para iPhone/iOS).
+    runs-on: ubuntu-latest
+
+    # Aquí defino los pasos que quiero que haga el robot.
+    steps:
+      # PASO 1: Descargar mi código
+      # Los Actions o 'uses' son como "plugins" o programas prefabricados que ha hecho otra persona
+      # y los ha publicado en el 'Marketplace de GitHub Actions' para que no tengas que programarlo todo tú.
+      # 'actions/checkout@v4' simplemente descarga mi código fuente al ordenador prestado de Ubuntu.
+      # Es el equivalente a hacer un git clone
+      - name: 1. Descargar el código
+        uses: actions/checkout@v4
+
+      # PASO 2: Ponerse el carnet de empleado de AWS
+      # Este es otro plugin prefabricado, pero creado oficialmente por los ingenieros de Amazon (aws-actions).
+      # Se encarga de coger los Secretos que guardé en los Ajustes de GitHub (las llaves IAM)
+      # y configurar el ordenador prestado para que pueda hablar con mi cuenta de AWS.
+      - name: 2. Configurar credenciales de AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # PASO 3: Login en ECR
+      # Otro plugin de Amazon. Este se conecta al ECR para "abrir la sesión" de Docker.
+      # ¿Por qué se pone un 'id: login-ecr'?
+      # Porque este paso no solo hace login, sino que al terminar, devuelve una "respuesta" (output).
+      # Concretamente, nos devuelve la URL exacta de mi ECR.
+      # Al ponerle el ID 'login-ecr', más abajo podremos decirle: "Oye, dame la respuesta del paso login-ecr".
+      - name: 3. Iniciar sesión en AWS ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # PASO 4: Crear y subir la imagen a ECR
+      - name: 4. Construir y subir imagen
+        id: build-image
+        # Aquí es donde uso el ID del paso anterior.
+        # Guardo en la variable 'ECR_REGISTRY' la URL que me devolvió el plugin de Amazon.
+        # Quedará algo como "123456789.dkr.ecr.us-east-1.amazonaws.com".
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: latest # La etiqueta que le pongo a la imagen (pueden ser también versiones como v1.0, v1.1, etc)
+
+        # 'run' significa que voy a abrir una terminal y voy a ejecutar comandos de Linux.
+        run: |
+          # 4.1. Entro a la carpeta donde está mi código y mi Dockerfile
+          cd Evolucion-Contenedores-AWS/api
+
+          # 4.2. Construyo la imagen. Fíjate cómo uso el $ECR_REGISTRY (la URL larga)
+          # y el $ECR_REPOSITORY (que lo definí arriba del todo como 'fase2-ecs-api-repo').
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+
+          # 4.3. Subo la imagen al almacén ECR (Equivalente a Docker Hub)
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      # PASO 5: Avisar al Encargado (ECS Service)
+      - name: 5. Avisar al Encargado (ECS Service)
+        run: |
+          # Este comando usa la herramienta oficial de AWS (aws cli) que ya viene instalada en el ubuntu-latest.
+          # Le digo: "Actualiza el servicio (update-service)".
+          # ¿Qué servicio? Le paso las variables globales que definí arriba del todo:
+          # --cluster fase2-ecs-cluster
+          # --service fase2-ecs-service
+          # Y le añado '--force-new-deployment', que significa: "Fuerza un reinicio ahora mismo para que coja la nueva imagen".
+          aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{ env.ECS_SERVICE }} --force-new-deployment
