@@ -11,3 +11,6 @@ terraform.tfstate.backup
 
 # Ignorar archivos ocultos del sistema
 .DS_Store
+
+# Ignorar bloqueos de Terraform
+*.lock.info
