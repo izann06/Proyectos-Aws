@@ -1,4 +1,4 @@
-name: Despliegue de FastAPI a AWS
+name: "Fase 1: Despliegue EC2 + Docker"
 
 # 1. ¿CUÁNDO se ejecuta este robot?
 on:

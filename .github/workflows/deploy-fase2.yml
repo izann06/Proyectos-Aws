@@ -1,4 +1,4 @@
-name: "Fase 2: Despliegue a ECS" # Nombre que aparece en la web de GitHub Actions
+name: "Fase 2: Despliegue a ECS + EC2" # Nombre que aparece en la web de GitHub Actions
 
 # ¿CUÁNDO SE EJECUTA ESTE ROBOT? (on)
 on:

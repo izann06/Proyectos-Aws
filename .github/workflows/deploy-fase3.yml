@@ -1,4 +1,4 @@
-name: Desplegar API en ECS Fargate (Fase 3)
+name: "Fase 3: Despliegue ECS + Fargate"
 
 on:
   push:
