@@ -216,7 +216,11 @@ Al finalizar, Terraform imprimirá algo como:
 Outputs:
   alb_url = "http://mi-proyecto-alb-1234567890.us-east-1.elb.amazonaws.com"
 ```
-Esa URL es tu API en producción. Los primeros segundos puede dar error mientras el contenedor arranca y pasa el Health Check.
+Esa URL es tu API en producción. Si la pones ahora no funcionará porque has creado toda la arquitectura (ECR, ECS...) con Terraform pero aún no has añadido la imagen Docker en ECS.
+
+Para desplegar la imagen Docker en ECS, debes ejecutar el workflow de GitHub Actions. 
+
+En este repositorio vete a Actions > Fase 3: Despliegue ECS + Fargate > Run workflow > Run workflow. Tardará un poco dale tiempo 2- 3 min y cuando te de el check verde ya podrás entrar a tu API.
 
 ---
 
