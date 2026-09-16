@@ -1,0 +1,72 @@
+name: Desplegar API en ECS Fargate (Fase 3)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "Evolucion-Contenedores-AWS/api/**"
+
+env:
+  AWS_REGION: eu-west-1
+  ECR_REPOSITORY: fase3-api-repo
+  ECS_CLUSTER: fase3-fargate-cluster
+  ECS_SERVICE: fase3-api-service
+  ECS_TASK_DEFINITION_FAMILY: fase3-api-task
+  CONTAINER_NAME: api-contenedor
+
+jobs:
+  deploy:
+    name: Desplegar en Fargate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Descargar el código
+        uses: actions/checkout@v4
+
+      - name: 2. Configurar credenciales de AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 3. Iniciar sesión en Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: 4. Construir y subir imagen Docker a ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          cd Evolucion-Contenedores-AWS/api
+          # Construimos la imagen
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          # La subimos a ECR
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          # Guardamos el nombre completo de la imagen para el siguiente paso
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: 5. Descargar la receta actual (Task Definition) de ECS
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition ${{ env.ECS_TASK_DEFINITION_FAMILY }} \
+            --query taskDefinition > task-definition.json
+
+      - name: 6. Insertar la nueva imagen Docker en la receta
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+
+      - name: 7. Desplegar la nueva receta en ECS Fargate
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
