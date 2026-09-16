@@ -7,6 +7,8 @@ on:
     paths:
       - "Evolucion-Contenedores-AWS/api/**"
 
+  workflow_dispatch:
+
 env:
   AWS_REGION: eu-west-1
   ECR_REPOSITORY: fase3-api-repo
