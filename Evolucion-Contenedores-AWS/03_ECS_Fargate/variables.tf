@@ -7,5 +7,5 @@ variable "region" {
 
 variable "proyecto" {
   description = "Nombre del proyecto (se usará como prefijo para los recursos)"
-  default     = "fase_3"
+  default     = "fase3"
 }
