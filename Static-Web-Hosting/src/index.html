@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitectura del Proyecto Frontend</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Arquitectura del proyecto</h1>
+            <p>Despliegue de una web estática usando servicios Serverless de AWS.</p>
+        </header>
+
+        <section class="architecture-diagram">
+            <!-- Usuario -->
+            <div class="node user-node">
+                <div class="icon">👤</div>
+                <div class="label">Usuario</div>
+            </div>
+            
+            <div class="arrow">⬇️</div>
+
+            <!-- Internet -->
+            <div class="node internet-node">
+                <div class="icon">🌐</div>
+                <div class="label">Internet</div>
+            </div>
+
+            <div class="arrow">⬇️</div>
+
+            <!-- Route 53 -->
+            <div class="node aws-node">
+                <div class="icon">🗺️</div>
+                <div class="label">Route 53<br><small>(DNS)</small></div>
+            </div>
+
+            <div class="arrow">⬇️</div>
+
+            <!-- CloudFront -->
+            <div class="node aws-node">
+                <div class="icon">⚡</div>
+                <div class="label">CloudFront<br><small>(CDN Global)</small></div>
+            </div>
+
+            <div class="arrow">⬇️</div>
+
+            <!-- S3 Bucket -->
+            <div class="node aws-node bucket-node">
+                <div class="icon">🪣</div>
+                <div class="label">S3 Bucket<br><small>(Archivos estáticos: HTML/CSS)</small></div>
+            </div>
+        </section>
+        
+        <footer>
+            <p>Proyecto desplegado 100% con Infraestructura como Código (Terraform).</p>
+        </footer>
+    </div>
+</body>
+</html>

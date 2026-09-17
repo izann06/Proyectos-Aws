@@ -1,0 +1,119 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f6f8;
+    color: #333;
+    line-height: 1.6;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.container {
+    max-width: 800px;
+    width: 100%;
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 40px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e1e4e8;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+header h1 {
+    color: #232f3e;
+    /* Color corporativo de AWS */
+    margin-bottom: 10px;
+    font-size: 28px;
+}
+
+header p {
+    color: #666;
+    font-size: 16px;
+}
+
+/* Diagrama de Arquitectura */
+.architecture-diagram {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 30px 0;
+}
+
+.node {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    padding: 15px 30px;
+    width: 250px;
+    text-align: left;
+}
+
+.node .icon {
+    font-size: 30px;
+    margin-right: 15px;
+}
+
+.node .label {
+    font-weight: bold;
+    font-size: 16px;
+    color: #222;
+}
+
+.node .label small {
+    display: block;
+    font-weight: normal;
+    color: #555;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+/* Colores específicos de los nodos */
+.user-node {
+    border-color: #4CAF50;
+    background-color: #e8f5e9;
+}
+
+.internet-node {
+    border-color: #2196F3;
+    background-color: #e3f2fd;
+}
+
+.aws-node {
+    border-color: #ff9900;
+    background-color: #fff8e1;
+}
+
+.bucket-node {
+    border-style: dashed;
+    /* Simboliza almacenamiento */
+}
+
+/* Flechas */
+.arrow {
+    font-size: 24px;
+    margin: 10px 0;
+    color: #666;
+}
+
+footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
+    font-size: 14px;
+    color: #888;
+}
