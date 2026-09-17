@@ -43,6 +43,23 @@ El flujo de una petición web sigue esta ruta:
 3. **Ver la web:**
    Abre la URL de CloudFront en tu navegador (ej: `https://d3xxxxxx.cloudfront.net`) y verás la landing page.
 
+### 🔄 Cómo actualizar la web manualmente (Sin CI/CD)
+
+Si haces un cambio en el código HTML/CSS y quieres que se refleje en producción, no basta con subirlo al S3, ya que CloudFront guarda en su memoria caché la versión antigua para ahorrar recursos. Sigue estos dos pasos:
+
+1. **Subir los archivos modificados a S3:**
+   ```bash
+   aws s3 sync src/ s3://TU_BUCKET_NAME_AQUI
+   ```
+   *(También puedes hacerlo en la Consola de AWS en la sección de S3 y luego en bucket que creaste para subir los archivos, pero yo lo enseño usando terraform)*
+
+2. **Invalidar la caché de CloudFront:**
+   Tenemos que forzar a CloudFront a que olvide la versión antigua y vaya a buscar la nueva al S3. Ejecuta esto con el ID de tu distribución (lo puedes ver en la consola de AWS o usando `terraform state show aws_cloudfront_distribution.cdn`):
+   ```bash
+   aws cloudfront create-invalidation --distribution-id TU_DISTRIBUTION_ID_AQUI --paths "/*"
+   ```
+   *(El `/*` indica que borre de la caché absolutamente todos los archivos).*
+
 ## 🧹 Limpieza
 
 Como siempre, para evitar costes residuales cuando termines de probar la arquitectura:
