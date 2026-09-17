@@ -1,0 +1,45 @@
+name: Deploy Static Web (S3 + CloudFront)
+
+on:
+  push:
+    branches:
+      - main
+    # Este workflow SOLO se ejecutará si modificas algo dentro de la carpeta del frontend
+    # o si modificas este mismo archivo YAML.
+    paths:
+      - 'Static-Web-Hosting/src/**'
+      - '.github/workflows/deploy-static-web.yml'
+
+env:
+  AWS_REGION: us-east-1
+  S3_BUCKET: frontend-basico-web-bucket-izan-001
+  CLOUDFRONT_DIST_ID: E3S7JDGPG1FY4Y
+
+jobs:
+  deploy:
+    name: Subir a S3 e Invalidar Caché
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Descargar el código
+        uses: actions/checkout@v4
+
+      - name: 2. Configurar credenciales de AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 3. Subir nuevos archivos a S3
+        run: |
+          echo "Sincronizando carpeta src con S3..."
+          # El flag --delete borra del S3 los archivos que tú hayas borrado en tu código local
+          aws s3 sync Static-Web-Hosting/src/ s3://${{ env.S3_BUCKET }} --delete
+
+      - name: 4. Invalidar caché de CloudFront
+        run: |
+          echo "Borrando caché antigua de CloudFront..."
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ env.CLOUDFRONT_DIST_ID }} \
+            --paths "/*"
