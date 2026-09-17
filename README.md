@@ -22,6 +22,10 @@ Un proyecto arquitectónico diseñado en 3 fases que demuestra cómo ha evolucio
 **Tecnologías:** `AWS Lambda` | `AWS Polly` | `AWS S3` | `Terraform` 
 Una arquitectura *Serverless* impulsada por eventos que convierte texto en audio utilizando la inteligencia artificial de AWS Polly. [Ver detalles del proyecto](./aws-serverless-text-to-speech/README.md).
 
+### 3. 🌐 [Alojamiento de Frontend Serverless](./Static-Web-Hosting)
+**Tecnologías:** `HTML/CSS` | `AWS S3` | `AWS CloudFront` | `Terraform` 
+La forma más eficiente, barata y segura de alojar una página web estática en AWS. Utilizando un Bucket S3 privado para el almacenamiento y distribuyéndolo globalmente a través de la red de caché (CDN) de CloudFront con seguridad OAC. [Ver arquitectura y detalles](./Static-Web-Hosting/README.md).
+
 ---
 
 *Si te gusta la tecnología y la automatización, ¡siéntete libre de explorar el código de las carpetas! Cada proyecto tiene su propio documento de aprendizaje paso a paso.*
