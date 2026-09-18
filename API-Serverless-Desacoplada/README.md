@@ -154,10 +154,14 @@ terraform apply
 
 Al terminar, Terraform te devolverá las URLs de tu API:
 
+```text
+url_api_gateway       = "https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com"
+url_endpoint_mensajes = "https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/mensajes"
 ```
-url_api_gateway       = "https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/$default"
-url_endpoint_mensajes = "https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/$default/mensajes"
-```
+
+**¿Para qué sirve esta URL exactamente?**
+Esa URL es tu **API Gateway**, la puerta de entrada blindada a tu sistema. 
+Aunque no puedas abrirla directamente en un navegador web (porque los navegadores hacen peticiones de lectura `GET` y nosotros le ordenamos a la API que solo escuche peticiones de escritura `POST`), es **exactamente aquí a donde tienes que apuntar** todas tus herramientas (como Postman, un frontend web o los comandos de terminal de abajo) para inyectar datos en tu base de datos enviando un JSON.
 
 ---
 
@@ -243,3 +247,24 @@ Terraform te pedirá confirmación antes de borrar nada.
 | **IAM** | Gestión de permisos para que cada servicio solo pueda acceder a lo que necesita |
 | **CloudWatch** | Logs automáticos de todo lo que ejecuta la Lambda |
 | **Terraform** | Para definir y versionar toda la infraestructura como código |
+
+---
+
+## Roadmap y Futuras Mejoras
+
+Esta arquitectura es una base sólida, pero está diseñada deliberadamente como un punto de partida. Aquí hay varias vías de mejora para convertirla en un proyecto mucho más completo:
+
+### 1. Añadir un endpoint GET para leer los datos
+**¿Por qué no funciona si pongo la URL de mi API en el navegador?**
+Actualmente, si pegas la URL en Google Chrome, te dará error. Esto es porque los navegadores hacen peticiones de tipo `GET` por defecto, pero nosotros hemos configurado nuestro API Gateway estrictamente para aceptar peticiones `POST` (ingesta de datos). Además, nuestro código Python actual solo sabe escribir en DynamoDB (`put_item`).
+
+**La mejora:** 
+Crear una segunda ruta en Terraform (`GET /mensajes`) y modificar el código Python (o crear una Lambda nueva) para que haga un `scan()` o `query()` en DynamoDB y devuelva los mensajes al usuario en formato JSON para que se puedan leer desde el navegador.
+
+### 2. Frontend con S3 y CloudFront
+En lugar de interactuar con la API mediante la terminal (`curl` o PowerShell), lo ideal es crear una pequeña web básica con HTML, CSS y un poco de JavaScript (para hacer los `fetch` a la API de forma visual).
+Esa web estática se alojaría de forma barata y global usando un **Bucket S3** distribuido mediante la CDN de **CloudFront** (como en el Proyecto 3), cerrando el círculo de una aplicación 100% Serverless (Frontend web + Backend API).
+
+### 3. Implementar un "Worker" para procesar la cola SQS
+Actualmente, nuestra cola SQS es un "callejón sin salida". Los mensajes entran y se quedan ahí almacenados hasta que expiran. 
+Para completar la arquitectura desacoplada, el siguiente paso lógico es crear un **Consumidor** (generalmente otra función Lambda). Esta nueva pieza estaría escuchando la cola SQS constantemente. Cada vez que llega un mensaje, lo coge, hace el trabajo pesado simulado (ej: procesar un pago simulado o mandar un email) y, al terminar, borra automáticamente el mensaje de la cola.
