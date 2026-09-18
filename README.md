@@ -26,6 +26,10 @@ Una arquitectura *Serverless* impulsada por eventos que convierte texto en audio
 **Tecnologías:** `HTML/CSS` | `AWS S3` | `AWS CloudFront` | `Terraform` 
 La forma más eficiente, barata y segura de alojar una página web estática en AWS. Utilizando un Bucket S3 privado para el almacenamiento y distribuyéndolo globalmente a través de la red de caché (CDN) de CloudFront con seguridad OAC. [Ver arquitectura y detalles](./Static-Web-Hosting/README.md).
 
+### 4. ⚡ [API Serverless Desacoplada](./API-Serverless-Desacoplada)
+**Tecnologías:** `Python` | `AWS API Gateway` | `AWS Lambda` | `AWS DynamoDB` | `AWS SQS` | `Terraform` 
+Una API HTTP 100% Serverless. Demuestra cómo usar una arquitectura orientada a eventos para desacoplar el procesamiento pesado usando colas de mensajes (SQS) como amortiguador entre peticiones web (API Gateway/Lambda) y la base de datos (DynamoDB). [Ver arquitectura y detalles](./API-Serverless-Desacoplada/README.md).
+
 ---
 
 *Si te gusta la tecnología y la automatización, ¡siéntete libre de explorar el código de las carpetas! Cada proyecto tiene su propio documento de aprendizaje paso a paso.*
